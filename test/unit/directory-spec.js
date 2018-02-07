@@ -1,5 +1,6 @@
 'use strict';
 
+const _sinon = require('sinon');
 const _chai = require('chai');
 _chai.use(require('sinon-chai'));
 _chai.use(require('chai-as-promised'));
@@ -20,10 +21,255 @@ describe('[Directory]', () => {
         Directory = _rewire('../../src/directory');
     });
 
+    describe('[Static Members]', () => {
+        it('should expose the expected static members', () => {
+            expect(Directory.createTree).to.be.a('function');
+            expect(Directory.traverseTree).to.be.a('function');
+        });
+
+        describe('createTree()', () => {
+            function _verifyDirectory(parent, name) {
+                const child = parent.getChildren().find((dir) => {
+                    return dir.name === name;
+                });
+                expect(child).to.be.an.instanceof(Directory);
+
+                const expectedPath = _path.join(parent.path, name, _path.sep);
+                expect(child.path).to.equal(expectedPath);
+                return child;
+            }
+
+            function _verifyLeaves(parent, ...children) {
+                children.forEach((childName) => {
+                    const child = _verifyDirectory(parent, childName);
+                    expect(child.getChildren()).to.deep.equal([]);
+                });
+            }
+
+            it('should throw an error if invoked without a valid root path', () => {
+                const error = 'Invalid rootPath specified (arg #1)';
+                const inputs = [null, undefined, 123, true, {}, [], () => {}];
+
+                inputs.forEach((path) => {
+                    const wrapper = () => {
+                        return Directory.createTree(path);
+                    };
+                    expect(wrapper).to.throw(error);
+                });
+            });
+
+            it('should throw an error if invoked without a valid tree object', () => {
+                const error = 'Invalid tree specified (arg #2)';
+                const inputs = [
+                    null,
+                    undefined,
+                    123,
+                    true,
+                    'test',
+                    [],
+                    () => {}
+                ];
+
+                inputs.forEach((tree) => {
+                    const wrapper = () => {
+                        const rootPath = './';
+                        return Directory.createTree(rootPath, tree);
+                    };
+                    expect(wrapper).to.throw(error);
+                });
+            });
+
+            it('should return a directory with no children if the tree is empty', () => {
+                const rootPath = '.';
+                const dirName = _path.basename(process.cwd());
+                const tree = {};
+                const root = Directory.createTree(rootPath, tree);
+
+                expect(root).to.be.an.instanceof(Directory);
+                expect(root.path).to.equal(_createPath(dirName, ''));
+            });
+
+            it('should add a child directory for each member of the tree', () => {
+                const rootPath = './';
+                const tree = {
+                    foo: null,
+                    bar: null,
+                    baz: null,
+                    chaz: null,
+                    faz: null
+                };
+                const root = Directory.createTree(rootPath, tree);
+                _verifyLeaves(root, 'foo', 'bar', 'baz', 'chaz', 'faz');
+            });
+
+            it('should create a sub tree for each child that references an object', () => {
+                const rootPath = './';
+                const tree = {
+                    src: {
+                        handlers: null,
+                        devices: null,
+                        data: null
+                    },
+                    test: {
+                        unit: {
+                            handlers: null,
+                            devices: null,
+                            data: null
+                        }
+                    },
+                    working: null,
+                    '.tmp': null,
+                    '.coverage': null
+                };
+                const root = Directory.createTree(rootPath, tree);
+
+                expect(root.getChildren()).to.have.length(5);
+                _verifyLeaves(root, 'working', '.tmp', '.coverage');
+
+                const src = _verifyDirectory(root, 'src');
+                expect(src.getChildren()).to.have.length(3);
+                _verifyLeaves(src, 'handlers', 'devices', 'data');
+
+                const test = _verifyDirectory(root, 'test');
+                expect(test.getChildren()).to.have.length(1);
+
+                const unit = _verifyDirectory(test, 'unit');
+                expect(unit.getChildren()).to.have.length(3);
+                _verifyLeaves(unit, 'handlers', 'devices', 'data');
+            });
+
+            it('should not add subtrees if the values are not objects', () => {
+                const rootPath = './';
+                const tree = {
+                    foo: 'foobar',
+                    bar: 123,
+                    baz: true,
+                    chaz: [],
+                    faz: () => {},
+                    raz: null,
+                    zaz: undefined
+                };
+                const root = Directory.createTree(rootPath, tree);
+                _verifyLeaves(
+                    root,
+                    'foo',
+                    'bar',
+                    'baz',
+                    'chaz',
+                    'faz',
+                    'raz',
+                    'zaz'
+                );
+            });
+        });
+
+        describe('traverseTree()', () => {
+            it('should throw an error if invoked without a Directory instance', () => {
+                const error = 'Invalid root directory specified (arg #1)';
+                const inputs = [
+                    null,
+                    undefined,
+                    123,
+                    true,
+                    'foo',
+                    {},
+                    [],
+                    () => {}
+                ];
+
+                inputs.forEach((root) => {
+                    const wrapper = () => {
+                        return Directory.traverseTree(root);
+                    };
+                    expect(wrapper).to.throw(error);
+                });
+            });
+
+            it('should throw an error if invoked without a callback function', () => {
+                const error = 'Invalid callback function specified (arg #1)';
+                const inputs = [null, undefined, 123, true, 'foo', {}, []];
+
+                inputs.forEach((callback) => {
+                    const wrapper = () => {
+                        const root = new Directory('.');
+                        return Directory.traverseTree(root, callback);
+                    };
+                    expect(wrapper).to.throw(error);
+                });
+            });
+
+            it('should invoke the callback function just once if the root has no children', () => {
+                const root = new Directory('.');
+                const callback = _sinon.spy();
+                const dirName = _path.basename(process.cwd());
+
+                expect(callback).to.not.have.been.called;
+
+                Directory.traverseTree(root, callback);
+
+                expect(callback).to.have.been.calledOnce;
+                expect(callback.args[0][0]).to.be.an.instanceof(Directory);
+                expect(callback.args[0][0].name).to.equal(dirName);
+            });
+
+            it('should recursively walk the tree structure in depth first fashion', () => {
+                const rootPath = './';
+                const dirName = _path.basename(process.cwd());
+                const tree = {
+                    src: {
+                        handlers: null,
+                        devices: null,
+                        data: null
+                    },
+                    test: {
+                        unit: {
+                            foo: null,
+                            bar: null,
+                            baz: null
+                        }
+                    },
+                    working: null,
+                    '.tmp': null,
+                    '.coverage': null
+                };
+                const expectedSequence = [
+                    dirName,
+                    'src',
+                    'handlers',
+                    'devices',
+                    'data',
+                    'test',
+                    'unit',
+                    'foo',
+                    'bar',
+                    'baz',
+                    'working',
+                    '.tmp',
+                    '.coverage'
+                ];
+
+                const root = Directory.createTree(rootPath, tree);
+                const callback = _sinon.spy();
+
+                expect(callback).to.not.have.been.called;
+
+                Directory.traverseTree(root, callback);
+
+                expect(callback.callCount).to.equal(expectedSequence.length);
+                expectedSequence.forEach((name, index) => {
+                    const dir = callback.args[index][0];
+                    expect(dir).to.be.an.instanceof(Directory);
+                    expect(dir.name).to.equal(name);
+                });
+            });
+        });
+    });
+
     describe('ctor()', () => {
         it('should throw an error if invoked without a valid path', () => {
             const error = 'Invalid path specified (arg #1)';
             const inputs = [null, undefined, 123, true, {}, [], () => {}];
+
             inputs.forEach((path) => {
                 const wrapper = () => {
                     return new Directory(path);
@@ -38,6 +284,7 @@ describe('[Directory]', () => {
             expect(dir).to.be.an('object');
             expect(dir.name).to.be.a('string');
             expect(dir.path).to.be.a('string');
+            expect(dir.absolutePath).to.be.a('string');
             expect(dir.addChild).to.be.a('function');
             expect(dir.getChildren).to.be.a('function');
             expect(dir.getFilePath).to.be.a('function');
@@ -56,13 +303,12 @@ describe('[Directory]', () => {
         });
 
         it('should return the name the current directory if the input path is empty or "."', () => {
-            function doTest(path) {
+            const inputs = ['', '.', `.${_path.sep}`, `.${_path.sep}.`];
+
+            inputs.forEach((path) => {
                 const dir = new Directory(path);
                 expect(dir.name).to.equal(_path.basename(_process.cwd()));
-            }
-
-            const inputs = ['', '.', `.${_path.sep}`, `.${_path.sep}.`];
-            inputs.forEach(doTest);
+            });
         });
 
         it('should return the name of the directory if a relative path is specified', () => {
@@ -217,15 +463,21 @@ describe('[Directory]', () => {
             });
         });
 
+        it('should return an instance of Directory', () => {
+            const dir = new Directory('');
+            const child = dir.addChild('baby');
+            expect(child).to.be.an.instanceof(Directory);
+        });
+
         it('should create and add a new Directory instance to the child array', () => {
             const dir = new Directory('');
 
             //NOTE: Examining "private" members.
             expect(dir._children).to.deep.equal([]);
-            dir.addChild('baby');
+            const child = dir.addChild('baby');
 
             expect(dir._children).to.have.length(1);
-            expect(dir._children[0]).to.be.an.instanceof(Directory);
+            expect(dir._children[0]).to.equal(child);
         });
 
         it('should initialize the child directory with the correct path', () => {
@@ -233,14 +485,13 @@ describe('[Directory]', () => {
             const childDirName = 'chaz';
             const dir = new Directory(parentPath);
 
-            dir.addChild(childDirName);
+            const child = dir.addChild(childDirName);
             const refChild = new Directory(
                 _path.join(parentPath, childDirName)
             );
 
-            //NOTE: Examining "private" members.
-            expect(dir._children[0].path).to.equal(refChild.path);
-            expect(dir._children[0].name).to.equal(refChild.name);
+            expect(child.path).to.equal(refChild.path);
+            expect(child.name).to.equal(refChild.name);
         });
     });
 

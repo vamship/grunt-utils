@@ -1,6 +1,7 @@
 'use strict';
 
 const _path = require('path');
+const _fs = require('fs');
 
 /**
  * Abstract representation of a directory, with methods for traversal and
@@ -24,6 +25,66 @@ class Directory {
         this._path = _path.join(relativePath, this._name, _path.sep);
         this._absolutePath = _path.join(_path.resolve(dirPath), _path.sep);
         this._children = [];
+    }
+
+    /**
+     * Creates a folder tree based on an object that describes the tree
+     * structure.
+     *
+     * @param {String} rootPath A string that represents the path to the root
+     *        directory of the tree.
+     * @param {Object} tree An object representation of the tree structure.
+     * @return {Directory} A directory object that represents the root of
+     *         the tree.
+     */
+    static createTree(rootPath, tree) {
+        if (typeof rootPath !== 'string') {
+            throw new Error('Invalid rootPath specified (arg #1)');
+        }
+        if (!tree || tree instanceof Array || typeof tree !== 'object') {
+            throw new Error('Invalid tree specified (arg #2)');
+        }
+
+        function createRecursive(parent, tree) {
+            if (typeof parent === 'string') {
+                parent = new Directory(parent);
+            }
+
+            if (tree && !(tree instanceof Array) && typeof tree === 'object') {
+                for (let dirName in tree) {
+                    let child = parent.addChild(dirName);
+                    createRecursive(child, tree[dirName]);
+                }
+            }
+            return parent;
+        }
+
+        return createRecursive(rootPath, tree);
+    }
+
+    /**
+     * Traverses a directory tree, invoking the callback function at each level
+     * of the tree.
+     *
+     * @param {Directory} root The root level of the tree to traverse.
+     * @param {Function} callback The callback function that is invoked as each
+     *        directory is traversed.
+     */
+    static traverseTree(root, callback) {
+        if (!(root instanceof Directory)) {
+            throw new Error('Invalid root directory specified (arg #1)');
+        }
+        if (typeof callback !== 'function') {
+            throw new Error('Invalid callback function specified (arg #1)');
+        }
+        function traverseRecursive(parent) {
+            callback(parent);
+            parent.getChildren().forEach((child) => {
+                traverseRecursive(child);
+            });
+        }
+
+        return traverseRecursive(root);
     }
 
     /**
@@ -71,6 +132,8 @@ class Directory {
         }
         const child = new Directory(_path.join(this.path, directoryName));
         this._children.push(child);
+
+        return child;
     }
 
     /**
