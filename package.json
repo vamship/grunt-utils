@@ -9,7 +9,7 @@
     "test": "nyc mocha -R spec --recursive test/unit/ && nyc report --reporter=html",
     "lint": "eslint src/**/*.js test/**/*.js",
     "format": "prettier --write \"{src,test}/**/*.js\"",
-    "default": "npm run format && npm run lint && npm run test && npm run clean"
+    "all": "npm run format && npm run lint && npm run test && npm run clean"
   },
   "repository": {
     "type": "git",
