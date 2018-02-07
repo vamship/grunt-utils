@@ -7,6 +7,7 @@ _chai.use(require('chai-as-promised'));
 const expect = _chai.expect;
 const _path = require('path');
 const _process = require('process');
+const _rewire = require('rewire');
 
 let Directory = null;
 
@@ -17,7 +18,7 @@ describe('[Directory]', () => {
     }
 
     beforeEach(() => {
-        Directory = require('../../src/directory');
+        Directory = _rewire('../../src/directory');
     });
 
     describe('ctor()', () => {
