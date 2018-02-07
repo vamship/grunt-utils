@@ -1,7 +1,6 @@
 'use strict';
 
 const _path = require('path');
-const _fs = require('fs');
 
 /**
  * Abstract representation of a directory, with methods for traversal and
@@ -125,7 +124,7 @@ class Directory {
         if (typeof directoryName !== 'string' || directoryName.length <= 0) {
             throw new Error('Invalid directoryName specified (arg #1)');
         }
-        if (directoryName.match(/[\\\/:]/)) {
+        if (directoryName.match(/[\\/:]/)) {
             throw new Error(
                 'Directory name cannot include path separators (:, \\ or /)'
             );
