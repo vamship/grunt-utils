@@ -3,13 +3,10 @@
   "version": "1.0.0",
   "description": "Utility library for grunt file configuration and grunt tasks",
   "main": "src/index.js",
-  "nyc": {
-    "report-dir": ".coverage"
-  },
   "scripts": {
     "monitor": "nodemon --exec npm run test",
     "test": "nyc mocha -R spec --recursive test/unit/ && nyc report --reporter=html",
-    "clean": "rm -rf .nyc_output .coverage"
+    "clean": "rm -rf .nyc_output coverage"
   },
   "repository": {
     "type": "git",
@@ -31,8 +28,8 @@
     "mocha": "^4.0.1",
     "nodemon": "^1.14.11",
     "nyc": "^11.4.1",
+    "rewire": "^3.0.2",
     "sinon-chai": "^2.14.0"
   },
-  "dependencies": {
-  }
+  "dependencies": {}
 }
