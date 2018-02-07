@@ -11,12 +11,12 @@ class Directory {
      * @param {String} dirPath The path represented by this directory.
      */
     constructor(dirPath) {
-        if(typeof dirPath !== 'string') {
+        if (typeof dirPath !== 'string') {
             throw new Error('Invalid path specified (arg #1)');
         }
 
         let relativePath = dirPath;
-        if(!_path.isAbsolute(dirPath)) {
+        if (!_path.isAbsolute(dirPath)) {
             relativePath = relativePath.replace(process.cwd(), '');
         }
         relativePath = _path.dirname(relativePath);
@@ -61,11 +61,13 @@ class Directory {
      * @param {String} directoryName Name of the child directory.
      */
     addChild(directoryName) {
-        if(typeof directoryName !== 'string' || directoryName.length <= 0) {
+        if (typeof directoryName !== 'string' || directoryName.length <= 0) {
             throw new Error('Invalid directoryName specified (arg #1)');
         }
         if (directoryName.match(/[\\\/:]/)) {
-            throw new Error('Directory name cannot include path separators (:, \\ or /)');
+            throw new Error(
+                'Directory name cannot include path separators (:, \\ or /)'
+            );
         }
         const child = new Directory(_path.join(this.path, directoryName));
         this._children.push(child);
@@ -90,7 +92,7 @@ class Directory {
      *         path.
      */
     getFilePath(fileName) {
-        if(typeof fileName !== 'string') {
+        if (typeof fileName !== 'string') {
             fileName = '';
         }
         return _path.join(this.path, fileName);
@@ -106,14 +108,13 @@ class Directory {
      */
     getAllFilesPattern(extension) {
         // extension = (extension && '*.' + extension) || '*';
-        if(typeof extension !== 'string') {
+        if (typeof extension !== 'string') {
             extension = '*';
         } else {
             extension = `*.${extension}`;
         }
         return _path.join(this.path, '**', extension);
     }
-
 }
 
 module.exports = Directory;

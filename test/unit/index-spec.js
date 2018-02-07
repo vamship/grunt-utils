@@ -9,7 +9,6 @@ const _rewire = require('rewire');
 let _index = null;
 
 describe('[index]', () => {
-
     beforeEach(() => {
         _index = _rewire('../../src/index');
     });
