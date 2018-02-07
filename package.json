@@ -4,10 +4,12 @@
   "description": "Utility library for grunt file configuration and grunt tasks",
   "main": "src/index.js",
   "scripts": {
+    "clean": "rm -rf .nyc_output coverage",
     "monitor": "nodemon --exec npm run test",
     "test": "nyc mocha -R spec --recursive test/unit/ && nyc report --reporter=html",
-    "clean": "rm -rf .nyc_output coverage",
-    "format": "prettier --write \"{src,test}/**/*.js\""
+    "lint": "eslint src/**/*.js test/**/*.js",
+    "format": "prettier --write \"{src,test}/**/*.js\"",
+    "default": "npm run format && npm run lint && npm run test && npm run clean"
   },
   "repository": {
     "type": "git",
@@ -26,6 +28,7 @@
   "devDependencies": {
     "chai": "^4.1.2",
     "chai-as-promised": "^7.1.1",
+    "eslint": "^4.17.0",
     "mocha": "^4.0.1",
     "nodemon": "^1.14.11",
     "nyc": "^11.4.1",
