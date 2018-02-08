@@ -7,7 +7,8 @@ const index = {
     /**
      * Reference to the directory component.
      *
-     * @return {Directory} A class that represents a directory on the file system.
+     * @return {Directory} A class that represents a directory on the file
+     *         system.
      */
     Directory: require('./directory')
 };

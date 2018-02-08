@@ -6,6 +6,8 @@ _chai.use(require('chai-as-promised'));
 
 const expect = _chai.expect;
 const _rewire = require('rewire');
+
+const Directory = require('../../src/directory');
 let _index = null;
 
 describe('[index]', () => {
@@ -14,6 +16,6 @@ describe('[index]', () => {
     });
 
     it('should expose the expected properties', () => {
-        expect(_index.Directory).to.be.a('function');
+        expect(_index.Directory).to.equal(Directory);
     });
 });
