@@ -183,7 +183,7 @@ class Directory {
         if (typeof fileName !== 'string') {
             fileName = '';
         }
-        return _path.join(this.path, fileName);
+        return _path.join(this.absolutePath, fileName);
     }
 
     /**
@@ -201,7 +201,7 @@ class Directory {
         } else {
             extension = `*.${extension}`;
         }
-        return _path.join(this.path, '**', extension);
+        return _path.join(this.absolutePath, '**', extension);
     }
 }
 

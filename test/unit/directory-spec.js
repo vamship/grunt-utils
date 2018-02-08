@@ -620,7 +620,7 @@ describe('[Directory]', () => {
                 const dir = new Directory('');
                 const ret = dir.getFilePath(fileName);
 
-                expect(ret).to.equal(dir.path);
+                expect(ret).to.equal(dir.absolutePath);
             });
         });
 
@@ -629,7 +629,7 @@ describe('[Directory]', () => {
             const dir = new Directory('');
             const ret = dir.getFilePath(fileName);
 
-            expect(ret).to.equal(_path.join(dir.path, fileName));
+            expect(ret).to.equal(_path.join(dir.absolutePath, fileName));
         });
     });
 
@@ -637,7 +637,8 @@ describe('[Directory]', () => {
         it('should return the expected globbing pattern when invoked without an extension', () => {
             const dirs = ['foo', 'bar', 'baz'];
             const path = _createPath(...dirs);
-            const expectedPattern = _createPath(...dirs, '**', '*');
+            const absPath = _path.resolve(...dirs);
+            const expectedPattern = _createPath(absPath, '**', '*');
 
             const dir = new Directory(path);
             const ret = dir.getAllFilesPattern();
@@ -648,7 +649,8 @@ describe('[Directory]', () => {
             const dirs = ['foo', 'bar', 'baz'];
             const ext = 'js';
             const path = _createPath(...dirs);
-            const expectedPattern = _createPath(...dirs, '**', `*.${ext}`);
+            const absPath = _path.resolve(...dirs);
+            const expectedPattern = _createPath(absPath, '**', `*.${ext}`);
 
             const dir = new Directory(path);
             const ret = dir.getAllFilesPattern(ext);
