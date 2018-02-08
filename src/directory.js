@@ -15,13 +15,9 @@ class Directory {
             throw new Error('Invalid path specified (arg #1)');
         }
 
-        let relativePath = dirPath;
-        if (!_path.isAbsolute(dirPath)) {
-            relativePath = relativePath.replace(process.cwd(), '');
-        }
-        relativePath = _path.dirname(relativePath);
+        let relativePath = dirPath.replace(process.cwd(), '');
         this._name = _path.basename(_path.resolve(dirPath));
-        this._path = _path.join(relativePath, this._name, _path.sep);
+        this._path = _path.join(relativePath, `.${_path.sep}`);
         this._absolutePath = _path.join(_path.resolve(dirPath), _path.sep);
         this._children = [];
     }

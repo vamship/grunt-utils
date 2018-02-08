@@ -81,12 +81,11 @@ describe('[Directory]', () => {
 
             it('should return a directory with no children if the tree is empty', () => {
                 const rootPath = '.';
-                const dirName = _path.basename(process.cwd());
                 const tree = {};
                 const root = Directory.createTree(rootPath, tree);
 
                 expect(root).to.be.an.instanceof(Directory);
-                expect(root.path).to.equal(_createPath(dirName, ''));
+                expect(root.path).to.equal(_createPath('.', ''));
             });
 
             it('should add a child directory for each member of the tree', () => {
@@ -388,15 +387,12 @@ describe('[Directory]', () => {
             expect(dir.path).to.equal(_path.sep);
         });
 
-        it('should use the resolved path to determine a standardized directory path', () => {
+        it('should return a standardized reference to the current directory', () => {
             const inputs = ['', '.', `.${_path.sep}`];
 
             inputs.forEach((path) => {
                 const dir = new Directory(path);
-                const expectedPath = _path.join(
-                    _path.basename(_process.cwd()),
-                    _path.sep
-                );
+                const expectedPath = _createPath('.', '');
                 expect(dir.path).to.equal(expectedPath);
             });
         });
