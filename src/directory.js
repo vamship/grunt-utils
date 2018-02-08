@@ -136,6 +136,35 @@ class Directory {
     }
 
     /**
+     * Retrieves a child directory object by recursively searching through the
+     * current directory's child tree.
+     *
+     * @param {String} path The relative path to the child directory, with
+     *        each path element separated by "/".
+     * @return {Directory} A directory reference for the specified child. If
+     *         a child is not found at the specified path, an error will be
+     *         thrown.
+     */
+    getChild(path) {
+        if (typeof path !== 'string' || path.length <= 0) {
+            throw new Error('Invalid child path specified (arg #1)');
+        }
+        const tokens = path.split('/');
+        const child = tokens.reduce((result, name) => {
+            if (!result) {
+                return result;
+            }
+            const children = result.getChildren();
+            return children.find((child) => child.name === name);
+        }, this);
+
+        if (!child) {
+            throw new Error(`Child not found at path: [${path}]`);
+        }
+        return child;
+    }
+
+    /**
      * Returns an array containing all first level children of the current
      * directory.
      *

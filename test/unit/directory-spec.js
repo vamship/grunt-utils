@@ -286,6 +286,7 @@ describe('[Directory]', () => {
             expect(dir.path).to.be.a('string');
             expect(dir.absolutePath).to.be.a('string');
             expect(dir.addChild).to.be.a('function');
+            expect(dir.getChild).to.be.a('function');
             expect(dir.getChildren).to.be.a('function');
             expect(dir.getFilePath).to.be.a('function');
             expect(dir.getAllFilesPattern).to.be.a('function');
@@ -294,12 +295,12 @@ describe('[Directory]', () => {
 
     describe('name', () => {
         it('should return an empty string if the input path is the root character', () => {
-            function doTest(path) {
+            const inputs = [_path.sep];
+
+            inputs.forEach((path) => {
                 const dir = new Directory(path);
                 expect(dir.name).to.equal('');
-            }
-
-            [_path.sep].forEach(doTest);
+            });
         });
 
         it('should return the name the current directory if the input path is empty or "."', () => {
@@ -313,27 +314,25 @@ describe('[Directory]', () => {
 
         it('should return the name of the directory if a relative path is specified', () => {
             const dirs = ['foo', 'bar', 'baz'];
-            function doTest(path) {
+            const inputs = [_createPath(...dirs), _createPath(...dirs, '')];
+
+            inputs.forEach((path) => {
                 const dir = new Directory(path);
                 expect(dir.name).to.equal('baz');
-            }
-
-            const inputs = [_createPath(...dirs), _createPath(...dirs, '')];
-            inputs.forEach(doTest);
+            });
         });
 
         it('should return the name of the directory if an absolute path is specified', () => {
             const dirs = ['foo', 'bar', 'baz'];
-            function doTest(path) {
-                const dir = new Directory(path);
-                expect(dir.name).to.equal('baz');
-            }
-
             const inputs = [
                 _createPath('', ...dirs),
                 _createPath('', ...dirs, '')
             ];
-            inputs.forEach(doTest);
+
+            inputs.forEach((path) => {
+                const dir = new Directory(path);
+                expect(dir.name).to.equal('baz');
+            });
         });
     });
 
@@ -344,43 +343,41 @@ describe('[Directory]', () => {
         });
 
         it('should use the resolved path to determine a standardized directory path', () => {
-            function doTest(path) {
+            const inputs = ['', '.', `.${_path.sep}`];
+
+            inputs.forEach((path) => {
                 const dir = new Directory(path);
                 const expectedPath = _path.join(
                     _path.basename(_process.cwd()),
                     _path.sep
                 );
                 expect(dir.path).to.equal(expectedPath);
-            }
-
-            const inputs = ['', '.', `.${_path.sep}`];
-            inputs.forEach(doTest);
+            });
         });
 
         it('should return a standardized directory path when a relative path is specified', () => {
             const dirs = ['foo', 'bar', 'baz'];
-            function doTest(path) {
+            const inputs = [_createPath(...dirs), _createPath(...dirs, '')];
+
+            inputs.forEach((path) => {
                 const dir = new Directory(path);
                 const expectedPath = _createPath(...dirs, '');
                 expect(dir.path).to.equal(expectedPath);
-            }
-
-            const inputs = [_createPath(...dirs), _createPath(...dirs, '')];
-            inputs.forEach(doTest);
+            });
         });
 
         it('should return a standardized directory path when an absolute path is specified', () => {
             const dirs = ['foo', 'bar', 'baz'];
-            function doTest(path) {
-                const dir = new Directory(path);
-                const expectedPath = _createPath('', ...dirs, '');
-                expect(dir.path).to.equal(expectedPath);
-            }
             const inputs = [
                 _createPath('', ...dirs),
                 _createPath('', ...dirs, '')
             ];
-            inputs.forEach(doTest);
+
+            inputs.forEach((path) => {
+                const dir = new Directory(path);
+                const expectedPath = _createPath('', ...dirs, '');
+                expect(dir.path).to.equal(expectedPath);
+            });
         });
     });
 
@@ -391,41 +388,38 @@ describe('[Directory]', () => {
         });
 
         it('should use the resolved path to determine a standardized directory path', () => {
-            function doTest(path) {
+            const inputs = ['', '.', `.${_path.sep}`];
+
+            inputs.forEach((path) => {
                 const dir = new Directory(path);
                 const expectedPath = _path.join(_path.resolve(path), _path.sep);
                 expect(dir.absolutePath).to.equal(expectedPath);
-            }
-
-            const inputs = ['', '.', `.${_path.sep}`];
-            inputs.forEach(doTest);
+            });
         });
 
         it('should return a standardized directory path when a relative path is specified', () => {
             const dirs = ['foo', 'bar', 'baz'];
-            function doTest(path) {
+            const inputs = [_createPath(...dirs), _createPath(...dirs, '')];
+
+            inputs.forEach((path) => {
                 const dir = new Directory(path);
                 let expectedPath = _createPath(_path.resolve(), ...dirs, '');
                 expect(dir.absolutePath).to.equal(expectedPath);
-            }
-
-            const inputs = [_createPath(...dirs), _createPath(...dirs, '')];
-            inputs.forEach(doTest);
+            });
         });
 
         it('should return a standardized directory path when an absolute path is specified', () => {
             const dirs = ['foo', 'bar', 'baz'];
-            function doTest(path) {
-                const dir = new Directory(path);
-                const expectedPath = _createPath('', ...dirs, '');
-                expect(dir.absolutePath).to.equal(expectedPath);
-            }
-
             const inputs = [
                 _createPath('', ...dirs),
                 _createPath('', ...dirs, '')
             ];
-            inputs.forEach(doTest);
+
+            inputs.forEach((path) => {
+                const dir = new Directory(path);
+                const expectedPath = _createPath('', ...dirs, '');
+                expect(dir.absolutePath).to.equal(expectedPath);
+            });
         });
     });
 
@@ -433,6 +427,7 @@ describe('[Directory]', () => {
         it('should throw an error if invoked without a valid directory name', () => {
             const error = 'Invalid directoryName specified (arg #1)';
             const inputs = [null, undefined, 123, true, {}, [], () => {}];
+
             inputs.forEach((path) => {
                 const wrapper = () => {
                     const dir = new Directory('');
@@ -454,6 +449,7 @@ describe('[Directory]', () => {
                 '\\child',
                 'c:'
             ];
+
             inputs.forEach((path) => {
                 const wrapper = () => {
                     const dir = new Directory('');
@@ -495,6 +491,70 @@ describe('[Directory]', () => {
         });
     });
 
+    describe('getChild()', () => {
+        it('should throw an error if invoked without a valid path', () => {
+            const error = 'Invalid child path specified (arg #1)';
+            const inputs = [null, undefined, 123, true, '', {}, [], () => {}];
+
+            inputs.forEach((path) => {
+                const wrapper = () => {
+                    const dir = new Directory('.');
+                    return dir.getChild(path);
+                };
+                expect(wrapper).to.throw(error);
+            });
+        });
+
+        it('should throw an error if a child does not exist at the specified path', () => {
+            const path = 'foo';
+            const error = `Child not found at path: [${path}]`;
+
+            const wrapper = () => {
+                const dir = new Directory('.');
+                return dir.getChild(path);
+            };
+            expect(wrapper).to.throw(error);
+        });
+
+        it('should return the child from its child list if the path is simple', () => {
+            const path = 'foo';
+            const dir = new Directory('.');
+            const child = dir.addChild(path);
+
+            const ret = dir.getChild(path);
+            expect(ret).to.equal(child);
+        });
+
+        it('should recursively search through its children if the path is complex', () => {
+            const childNames = ['foo', 'bar'];
+            const path = _createPath(...childNames);
+            const dir = new Directory('.');
+
+            const lastChild = childNames.reduce((result, name) => {
+                return result.addChild(name);
+            }, dir);
+
+            const ret = dir.getChild(path);
+            expect(ret).to.equal(lastChild);
+        });
+
+        it('should abort search with an error if a child is not found in the path', () => {
+            const childNames = ['foo', 'bar'];
+            const path = _createPath('foo', 'bar', 'baz');
+            const error = `Child not found at path: [${path}]`;
+            const dir = new Directory('.');
+
+            childNames.forEach((name) => {
+                dir.addChild(name);
+            });
+
+            const wrapper = () => {
+                return dir.getChild(path);
+            };
+            expect(wrapper).to.throw(error);
+        });
+    });
+
     describe('getChildren()', () => {
         it('should return an array containing all of the child directories', () => {
             const parent = new Directory('');
@@ -513,6 +573,7 @@ describe('[Directory]', () => {
     describe('getFilePath()', () => {
         it('should return the path to the parent if invoked without a valid fileName', () => {
             const inputs = [null, undefined, 123, true, {}, [], () => {}];
+
             inputs.forEach((fileName) => {
                 const dir = new Directory('');
                 const ret = dir.getFilePath(fileName);
