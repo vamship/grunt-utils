@@ -76,14 +76,15 @@ class Directory {
         if (typeof callback !== 'function') {
             throw new Error('Invalid callback function specified (arg #1)');
         }
-        function traverseRecursive(parent) {
-            callback(parent);
+        function traverseRecursive(parent, level) {
+            callback(parent, level);
+            level++;
             parent.getChildren().forEach((child) => {
-                traverseRecursive(child);
+                traverseRecursive(child, level);
             });
         }
 
-        return traverseRecursive(root);
+        return traverseRecursive(root, 0);
     }
 
     /**

@@ -208,8 +208,12 @@ describe('[Directory]', () => {
                 Directory.traverseTree(root, callback);
 
                 expect(callback).to.have.been.calledOnce;
-                expect(callback.args[0][0]).to.be.an.instanceof(Directory);
-                expect(callback.args[0][0].name).to.equal(dirName);
+                const dir = callback.args[0][0];
+                expect(dir).to.be.an.instanceof(Directory);
+                expect(dir.name).to.equal(dirName);
+
+                const level = callback.args[0][1];
+                expect(level).to.equal(0);
             });
 
             it('should recursively walk the tree structure in depth first fashion', () => {
@@ -233,19 +237,58 @@ describe('[Directory]', () => {
                     '.coverage': null
                 };
                 const expectedSequence = [
-                    dirName,
-                    'src',
-                    'handlers',
-                    'devices',
-                    'data',
-                    'test',
-                    'unit',
-                    'foo',
-                    'bar',
-                    'baz',
-                    'working',
-                    '.tmp',
-                    '.coverage'
+                    {
+                        name: dirName,
+                        level: 0
+                    },
+                    {
+                        name: 'src',
+                        level: 1
+                    },
+                    {
+                        name: 'handlers',
+                        level: 2
+                    },
+                    {
+                        name: 'devices',
+                        level: 2
+                    },
+                    {
+                        name: 'data',
+                        level: 2
+                    },
+                    {
+                        name: 'test',
+                        level: 1
+                    },
+                    {
+                        name: 'unit',
+                        level: 2
+                    },
+                    {
+                        name: 'foo',
+                        level: 3
+                    },
+                    {
+                        name: 'bar',
+                        level: 3
+                    },
+                    {
+                        name: 'baz',
+                        level: 3
+                    },
+                    {
+                        name: 'working',
+                        level: 1
+                    },
+                    {
+                        name: '.tmp',
+                        level: 1
+                    },
+                    {
+                        name: '.coverage',
+                        level: 1
+                    }
                 ];
 
                 const root = Directory.createTree(rootPath, tree);
@@ -256,10 +299,13 @@ describe('[Directory]', () => {
                 Directory.traverseTree(root, callback);
 
                 expect(callback.callCount).to.equal(expectedSequence.length);
-                expectedSequence.forEach((name, index) => {
+                expectedSequence.forEach((info, index) => {
                     const dir = callback.args[index][0];
                     expect(dir).to.be.an.instanceof(Directory);
-                    expect(dir.name).to.equal(name);
+                    expect(dir.name).to.equal(info.name);
+
+                    const level = callback.args[index][1];
+                    expect(level).to.equal(info.level);
                 });
             });
         });
