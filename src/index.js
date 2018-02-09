@@ -1,16 +1,15 @@
 'use strict';
 
 /**
- * Root module that exports components from the library.
+ * Utility library for grunt file configuration and grunt task
+ *
+ * @module _index
  */
-const index = {
+module.exports = {
     /**
-     * Reference to the directory component.
+     * A class that represents a directory on the file system.
      *
-     * @return {Directory} A class that represents a directory on the file
-     *         system.
+     * @type {Directory}
      */
     Directory: require('./directory')
 };
-
-module.exports = index;

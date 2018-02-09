@@ -467,7 +467,7 @@ describe('[Directory]', () => {
 
     describe('addChild()', () => {
         it('should throw an error if invoked without a valid directory name', () => {
-            const error = 'Invalid directoryName specified (arg #1)';
+            const error = 'Invalid directory name specified (arg #1)';
             const inputs = [null, undefined, 123, true, {}, [], () => {}];
 
             inputs.forEach((path) => {
