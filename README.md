@@ -3,4 +3,6 @@ This is a library containing utility methods for grunt tasks and Gruntfile confi
 
 
 ## Installation
-> npm install @vamship/grunt-utils
+```
+npm install @vamship/grunt-utils
+```
