@@ -13,6 +13,9 @@ This library does not actually implement grunt tasks, but provides utility
 classes and modules to not just build grunt tasks, but also configure
 gruntfiles for a given project.
 
+## API Documentation
+API documentation can be found [here](https://vamship.github.io/grunt-utils).
+
 ## Motivation
 
 In addition to writing code (and tests!), every project brings with it a common
