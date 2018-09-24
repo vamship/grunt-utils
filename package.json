@@ -29,16 +29,16 @@
   "devDependencies": {
     "chai": "^4.1.2",
     "chai-as-promised": "^7.1.1",
-    "docdash": "^0.4.0",
-    "eslint": "^4.19.1",
+    "docdash": "^1.0.0",
+    "eslint": "^5.6.0",
     "jsdoc": "^3.5.5",
     "mocha": "^5.2.0",
-    "nodemon": "^1.17.5",
-    "nyc": "^11.8.0",
-    "prettier": "^1.13.2",
+    "nodemon": "^1.18.4",
+    "nyc": "^13.0.1",
+    "prettier": "^1.14.3",
     "rewire": "^4.0.1",
-    "sinon": "^5.0.10",
-    "sinon-chai": "^3.1.0"
+    "sinon": "^6.3.4",
+    "sinon-chai": "^3.2.0"
   },
   "dependencies": {}
 }
