@@ -1,6 +1,6 @@
 {
   "name": "@vamship/grunt-utils",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Utility library for grunt file configuration and grunt tasks",
   "main": "src/index.js",
   "scripts": {
